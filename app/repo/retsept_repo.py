@@ -1,6 +1,6 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
 
+from app.db.base import Session
 from app.models.retsept import Retsepts
 from app.schemas.taomlar_schemas import CreateRetsept, UpdateRetsept
 
@@ -27,7 +27,7 @@ def delete_retsept(db:Session,retsept_id:int):
         raise HTTPException(status_code=404,detail="Malumot topilmadi")
     db.delete(db_retseptd)
     db.commit()
-    db.refresh(db_retseptd)
+
     return db_retseptd
 
 def retsept_update(db:Session,retsept_id:int,retsept:UpdateRetsept):
@@ -40,4 +40,10 @@ def retsept_update(db:Session,retsept_id:int,retsept:UpdateRetsept):
     db.commit()
     db.refresh(db_retsept)
 
+    return db_retsept
+
+def search_retsept_masalliq(db: Session, masalliq: str):
+    db_retsept = db.query(Retsepts).filter(Retsepts.masalliqlar.ilike(f"%{masalliq}%")).all()
+    if not db_retsept:
+        raise HTTPException(status_code=404,detail="Malumot topilmadi")
     return db_retsept
